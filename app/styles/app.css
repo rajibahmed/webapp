@@ -168,6 +168,7 @@ header .intro-text .skills {
 .navbar-default,
 .navbar-inverse {
     border: 0;
+    opacity: .9;
 }
 
 section {
@@ -216,7 +217,7 @@ section.success a.active {
 }
 
 #portfolio .portfolio-item img{
-  width:400px;  
+  width:400px;
 }
 
 #portfolio .portfolio-item .portfolio-link .caption {
