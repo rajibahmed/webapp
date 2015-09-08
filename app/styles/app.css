@@ -464,3 +464,11 @@ footer .footer-below {
 }
 
 /* end for feelance theme */
+
+.circle-image{
+	width: 150px;
+	height: 150px;
+	border-radius: 75px;
+	-webkit-border-radius: 75px;
+	-moz-border-radius: 75px;
+}
