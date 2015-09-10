@@ -5,14 +5,14 @@ from fabric.contrib import files
 from datetime import datetime
 
 def setup():
-    development()
     ssh()
+    hostconfig()
 
-def production():
+def prod():
     env.hosts = ['10.100.0.70',]
     env.remote_admin = 'sysadmin'
 
-def development():
+def dev():
     env.hosts = ['172.16.195.11']
     env.remote_admin = 'rajib'
 
@@ -37,8 +37,10 @@ def cmd_exists(cmd):
 #######################
 
 def apt_upgrade():
-    apt("update -y")
     apt("upgrade")
+
+def apt_update():
+    apt("update -y")
 
 def apt(cmd):
     sudo("apt-get %s" % cmd)
@@ -60,6 +62,9 @@ def install_nginx():
 #######################
 # Code deployment
 #######################
+
+def pack():
+    put("")
 
 def deploy():
     with cd('/var/www'):
