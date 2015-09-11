@@ -59,13 +59,43 @@ def install_nginx():
     if not cmd_exists('nginx'):
         apt("install -y nginx")
 
+def install_goaccess():
+    if not cmd_exists('goaccess'):
+        apt("install -y goaccess")
+
 #######################
 # Code deployment
 #######################
 
+def start():
+    """docstring for start"""
+
+def stop():
+    """docstring for stop"""
+
+
 def pack():
-    put("")
+    local('tar -zcvf /tmp/app.tar.gz dist')
+    run('rm /tmp/app.tar.gz')
+    put("/tmp/app.tar.gz","/tmp/app.tar.gz")
+
+def backup():
+    if files.exists('/var/www/html'):
+        run('tar -zcvf ~/%s.tar.gz /var/www/html/' % datetime.now().strftime('%Y%m%d%H%M%S'))
 
 def deploy():
-    with cd('/var/www'):
-        run("mkdir %s" % datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+    pack()
+    backup()
+
+    with cd('/var/www/'):
+        sudo('rm -rf html')
+        sudo('tar -xzvf /tmp/app.tar.gz')
+        sudo('mv dist html')
+
+
+def add_cronjob():
+    put('status_check.sh', '~/status_check.sh')
+    run('crontab -l > /tmp/crondump')
+    run('echo "* * * * *  ~/status_check.sh> /dev/null" >> /tmp/crondump')
+    run('crontab /tmp/crondump')
+
