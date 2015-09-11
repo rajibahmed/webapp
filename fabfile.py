@@ -98,6 +98,8 @@ def backup():
         run('tar -zcvf ~/%s.tar.gz /var/www/html/' % datetime.now().strftime('%Y%m%d%H%M%S'))
 
 def deploy():
+    pack()
+    backup()
     with cd('/var/www/'):
         sudo('rm -rf html')
         sudo('tar -xzvf /tmp/app.tar.gz')
