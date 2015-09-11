@@ -7,13 +7,14 @@ from datetime import datetime
 def setup():
     ssh()
     hostconfig()
+    sudo('mkdir -p /var/www/html')
 
 def prod():
     env.hosts = ['10.100.0.70',]
     env.remote_admin = 'sysadmin'
 
 def dev():
-    env.hosts = ['172.16.195.11']
+    env.hosts = ['192.168.10.159']
     env.remote_admin = 'rajib'
 
 
@@ -54,6 +55,12 @@ def install_nodejs():
     if not cmd_exists('nodejs'):
         apt("install -y nodejs")
         apt("install -y npm")
+    
+    if not cmd_exists('node'):
+        with cd('/usr/bin'):
+            sudo('ln -s nodejs node')
+
+    sudo('npm install pm2 -g')
 
 def install_nginx():
     if not cmd_exists('nginx'):
@@ -70,17 +77,20 @@ def install_goaccess():
 
 def start():
     with cd('/var/www/html/server'):
-        run('nodejs index.js &')
+        run("pm2 start index.js")
     
-    run('nginx -s reload')
+    sudo('nginx -s reload')
 
 def stop():
-    sudo("killall nodejs")
+    with cd('/var/www/html/server'):
+        sudo("pm2 stop index.js")
 
 
 def pack():
+    local('ember build')
     local('tar -zcvf /tmp/app.tar.gz dist')
-    run('rm /tmp/app.tar.gz')
+    if files.exists('/tmp/app.tar.gz'):
+        run('rm /tmp/app.tar.gz')
     put("/tmp/app.tar.gz","/tmp/app.tar.gz")
 
 def backup():
@@ -88,18 +98,8 @@ def backup():
         run('tar -zcvf ~/%s.tar.gz /var/www/html/' % datetime.now().strftime('%Y%m%d%H%M%S'))
 
 def deploy():
-    pack()
-    backup()
-
     with cd('/var/www/'):
         sudo('rm -rf html')
         sudo('tar -xzvf /tmp/app.tar.gz')
         sudo('mv dist html')
-
-
-def add_cron():
-    put('status_check.sh', '~/status_check.sh')
-    run('crontab -l > /tmp/crondump')
-    run('echo "* * * * *  ~/status_check.sh> /dev/null" >> /tmp/crondump')
-    run('crontab /tmp/crondump')
 
