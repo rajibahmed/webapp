@@ -58,6 +58,7 @@ def install_nodejs():
 def install_nginx():
     if not cmd_exists('nginx'):
         apt("install -y nginx")
+        put('default.nginx', '/etc/nginx/sites-available/default',use_sudo=True)
 
 def install_goaccess():
     if not cmd_exists('goaccess'):
@@ -68,10 +69,13 @@ def install_goaccess():
 #######################
 
 def start():
-    """docstring for start"""
+    with cd('/var/www/html/server'):
+        run('nodejs index.js &')
+    
+    run('nginx -s reload')
 
 def stop():
-    """docstring for stop"""
+    sudo("killall nodejs")
 
 
 def pack():
@@ -93,7 +97,7 @@ def deploy():
         sudo('mv dist html')
 
 
-def add_cronjob():
+def add_cron():
     put('status_check.sh', '~/status_check.sh')
     run('crontab -l > /tmp/crondump')
     run('echo "* * * * *  ~/status_check.sh> /dev/null" >> /tmp/crondump')
